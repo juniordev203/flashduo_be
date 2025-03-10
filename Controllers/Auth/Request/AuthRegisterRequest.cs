@@ -16,4 +16,5 @@ public class AuthRegisterRequest
     [Required]
     [Compare("Password", ErrorMessage = "Xác nhận mật khẩu không khớp!")]
     public string FirmPassword { get; set; }
+    
 }

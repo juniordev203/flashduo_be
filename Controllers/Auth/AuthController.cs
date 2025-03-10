@@ -33,9 +33,9 @@ public class AuthController : Controller
         {
             return BadRequest("Mật khẩu không khớp");
         }
-        if (await _context.User.AnyAsync(u => u.FullName == registerRequest.Username))
+        if (await _context.Account.AnyAsync(a => a.Email == registerRequest.Email))
         {
-            return BadRequest("Tên tài khoản đã tồn tại");
+            return BadRequest("Email đã tồn tại");
         }
 
         if (string.IsNullOrEmpty(registerRequest.Email))
@@ -55,6 +55,14 @@ public class AuthController : Controller
         _context.Account.Add(account);
         await _context.SaveChangesAsync();
 
+        var newUser = new Models.User
+        {
+            AccountId = account.Id,
+            FullName = registerRequest.Username,
+            AvatarUrl = "default-avatar.png",
+        };
+        _context.User.Add(newUser);
+        await _context.SaveChangesAsync();
         return Ok("Đăng ký thành công!");
     }
 
@@ -76,7 +84,7 @@ public class AuthController : Controller
         {
             return Unauthorized(new { message = "Tài khoản hoặc mật khẩu không đúng." });
         }
-        
+
         var token = GenerateJwtToken(account);
         var response = new AuthLoginResponse
         {
@@ -96,7 +104,8 @@ public class AuthController : Controller
         {
             new Claim(JwtRegisteredClaimNames.Sub, account.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, account.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim("accountId", account.Id.ToString())
         };
 
         var token = new JwtSecurityToken(

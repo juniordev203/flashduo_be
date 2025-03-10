@@ -13,7 +13,8 @@ public class User
     public int AccountId { get; set; }
     [ForeignKey("AccountId")]
     public Account Account { get; set; }
-    
-    public string FullName { get; set; }
+
+    public string FullName { get; set; } = "Flashduo Guy";
     public string AvatarUrl { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
