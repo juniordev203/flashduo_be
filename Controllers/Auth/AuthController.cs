@@ -1,46 +1,112 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using backend.Controllers.Auth.request;
+using backend.Controllers.Auth.Response;
+using backend.Controllers.Response;
 using backend.Data;
 using backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Org.BouncyCastle.Crypto.Generators;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace backend.Controllers.Auth;
-
-[Route("api/auth")]
+[SwaggerTag("auth-v1")]
 [ApiController]
+[Route("api/[controller]")]
 public class AuthController : Controller
 {
     private readonly AppDbContext _context;
-
-    public AuthController(AppDbContext context)
+    private readonly IConfiguration _config;
+    public AuthController(AppDbContext context, IConfiguration configuration)
     {
         _context = context;
+        _config = configuration;
     }
-
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] AuthRequestRegister request)
+    public async Task<IActionResult> Register([FromBody] AuthRegisterRequest registerRequest)
     {
-        if (request.Password != request.FirmPassword)
+        if (registerRequest.Password != registerRequest.FirmPassword)
         {
             return BadRequest("Mật khẩu không khớp");
         }
-        if (await _context.Users.AnyAsync(u => u.Username == request.Username))
+        if (await _context.User.AnyAsync(u => u.FullName == registerRequest.Username))
         {
-            return BadRequest("Ten tai khoan da ton tai");
+            return BadRequest("Tên tài khoản đã tồn tại");
         }
-        string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
+        if (string.IsNullOrEmpty(registerRequest.Email))
+        {
+            return BadRequest(new { message = "Email không được để trống!" });
+        }
+        // ma hoa mat khau
+        string passwordHash = BCrypt.Net.BCrypt.HashPassword(registerRequest.Password);
 
         // Tạo user mới
-        var user = new User
+        var account = new Account
         {
-            Username = request.Username,
-            PasswordHash = passwordHash
+            Email = registerRequest.Email,
+            PasswordHash = passwordHash,
         };
 
-        _context.Users.Add(user);
+        _context.Account.Add(account);
         await _context.SaveChangesAsync();
 
         return Ok("Đăng ký thành công!");
+    }
+
+    [AllowAnonymous]
+    [HttpPost("login")]
+    [ProducesResponseType(typeof(AuthLoginResponse), 200)]
+    public async Task<IActionResult> Login([FromBody] AuthLoginRequest loginRequest)
+    {
+        if (string.IsNullOrWhiteSpace(loginRequest.Email) || string.IsNullOrWhiteSpace(loginRequest.Password))
+        {
+            return BadRequest(new { message = "Vui lòng điền email và mật khẩu!" });
+        }
+
+        var account = await _context.Account
+            .Include(a => a.User)
+            .FirstOrDefaultAsync(u => u.Email == loginRequest.Email);
+        
+        if (account == null || !BCrypt.Net.BCrypt.Verify(loginRequest.Password, account.PasswordHash))
+        {
+            return Unauthorized(new { message = "Tài khoản hoặc mật khẩu không đúng." });
+        }
+        
+        var token = GenerateJwtToken(account);
+        var response = new AuthLoginResponse
+        {
+            Token = token,
+            Id = account.Id,
+            Email = account.Email,
+            FullName = "Flashduo Guy",
+            Role = account.Role
+        };
+        return Ok(response);
+    }
+
+    private string GenerateJwtToken(Account account)
+    {
+        var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, account.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Email, account.Email),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        var token = new JwtSecurityToken(
+            issuer: _config["Jwt:Issuer"],
+            audience: _config["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddHours(12),
+            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
