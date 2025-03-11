@@ -12,7 +12,8 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace backend.Controllers.Forum;
 
-[SwaggerTag("forum-v1")]
+[ApiExplorerSettings(GroupName = "Forum")]
+[Tags("Forum")]
 [ApiController]
 [Route("api/[controller]")]
 public class ForumController : ControllerBase

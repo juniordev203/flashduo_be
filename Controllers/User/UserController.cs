@@ -7,7 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace backend.Controllers.User;
-[SwaggerTag("User-v1")]
+
+[ApiExplorerSettings(GroupName = "User")]
+[Tags("User")]
 [ApiController]
 [Route("api/[controller]")]
 public class UserController : ControllerBase

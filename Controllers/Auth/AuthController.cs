@@ -14,7 +14,8 @@ using Org.BouncyCastle.Crypto.Generators;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace backend.Controllers.Auth;
-[SwaggerTag("auth-v1")]
+[ApiExplorerSettings(GroupName = "Auth")] // Nhóm API này vào "Auth"
+[Tags("Auth")] 
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : Controller
