@@ -28,7 +28,7 @@ public class UserController : ControllerBase
     {
         try
         {
-            if (accountId == 0) return BadRequest("loi account id");
+            if (accountId <= 0) return BadRequest("loi account id");
             // Tìm user theo accountId
             var user = await _context.User
                 .Where(u => u.AccountId == accountId)
@@ -38,11 +38,12 @@ public class UserController : ControllerBase
                     fullName = u.FullName,
                     avatarUrl = u.AvatarUrl,
                 }).FirstOrDefaultAsync();
+            if (user == null) return NotFound("Khong tim thay nguoi dung");
             return Ok(user);
         }
-        catch
+        catch (Exception ex)
         {
-            return BadRequest();
+            return StatusCode(500, $"Lỗi server: {ex.Message}");
         }
     }
     

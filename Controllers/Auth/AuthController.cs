@@ -60,7 +60,7 @@ public class AuthController : Controller
         {
             AccountId = account.Id,
             FullName = registerRequest.Username,
-            AvatarUrl = "default-avatar.png",
+            AvatarUrl = "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.istockphoto.com%2Fphotos%2Fuser-avatar&psig=AOvVaw2cN4bWSN2jFoSNIxHrNrXl&ust=1741756548332000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCICJ8_SigYwDFQAAAAAdAAAAABAE",
         };
         _context.User.Add(newUser);
         await _context.SaveChangesAsync();
