@@ -77,10 +77,13 @@ public class AuthController : Controller
             return BadRequest(new { message = "Vui lòng điền email và mật khẩu!" });
         }
 
+        if (!IsValidEmail(loginRequest.Email))
+        {
+            return BadRequest(new { message ="email không hợp lệ! "});
+        }
         var account = await _context.Account
             .Include(a => a.User)
             .FirstOrDefaultAsync(u => u.Email == loginRequest.Email);
-        
         if (account == null || !BCrypt.Net.BCrypt.Verify(loginRequest.Password, account.PasswordHash))
         {
             return Unauthorized(new { message = "Tài khoản hoặc mật khẩu không đúng." });
@@ -96,6 +99,20 @@ public class AuthController : Controller
             Role = account.Role
         };
         return Ok(response);
+        
+        
+    }
+    private bool IsValidEmail(string email)
+    {
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private string GenerateJwtToken(Account account)
