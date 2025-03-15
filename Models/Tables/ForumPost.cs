@@ -13,7 +13,7 @@ public class ForumPost
     public string Content { get; set; }
     [Required]
     public DateTime CreateAt { get; set; } = DateTime.UtcNow;
-    //lien ket voi chu de
+    
     [Required]
     public int TopicId { get; set; }
     [ForeignKey("TopicId")]

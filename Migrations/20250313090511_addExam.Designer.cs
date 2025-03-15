@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using backend.Data;
 
@@ -10,9 +11,11 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250313090511_addExam")]
+    partial class addExam
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -45,7 +48,7 @@ namespace backend.Migrations
                     b.ToTable("Account");
                 });
 
-            modelBuilder.Entity("backend.Models.Answer", b =>
+            modelBuilder.Entity("backend.Models.Choice", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -66,7 +69,7 @@ namespace backend.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("Answer");
+                    b.ToTable("Choice");
                 });
 
             modelBuilder.Entity("backend.Models.Exam", b =>
@@ -339,22 +342,19 @@ namespace backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("DurationSeconds")
+                    b.Property<int?>("DurationSeconds")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime(6)");
 
                     b.Property<int>("ExamId")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsSubmitted")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<int>("ScoreListening")
+                    b.Property<int?>("ScoreListening")
                         .HasColumnType("int");
 
-                    b.Property<int>("ScoreReading")
+                    b.Property<int?>("ScoreReading")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("StartTime")
@@ -365,7 +365,7 @@ namespace backend.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(0);
 
-                    b.Property<int>("TotalScore")
+                    b.Property<int?>("TotalScore")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
@@ -380,10 +380,10 @@ namespace backend.Migrations
                     b.ToTable("UserExam");
                 });
 
-            modelBuilder.Entity("backend.Models.Answer", b =>
+            modelBuilder.Entity("backend.Models.Choice", b =>
                 {
                     b.HasOne("backend.Models.Question", "Question")
-                        .WithMany("Answer")
+                        .WithMany("Choice")
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -563,7 +563,7 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.Question", b =>
                 {
-                    b.Navigation("Answer");
+                    b.Navigation("Choice");
                 });
 
             modelBuilder.Entity("backend.Models.User", b =>
