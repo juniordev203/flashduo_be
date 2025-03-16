@@ -17,7 +17,7 @@ public class AppDbContext : DbContext
     public DbSet<Exam> Exam { get; set; }
     public DbSet<ExamQuestion> ExamQuestion { get; set; }
     public DbSet<Question> Question { get; set; }
-    public DbSet<Answer> Answer { get; set; }
+    public DbSet<QuestionAnswer> QuestionAnswer { get; set; }
     public DbSet<UserAnswer> UserAnswer { get; set; }
     public DbSet<UserExam> UserExam { get; set; }
     
@@ -93,9 +93,9 @@ public class AppDbContext : DbContext
             .WithMany(e => e.ExamQuestion)
             .HasForeignKey(eq => eq.ExamId)
             .OnDelete(DeleteBehavior.Cascade);
-        modelBuilder.Entity<Answer>()
+        modelBuilder.Entity<QuestionAnswer>()
             .HasOne(c => c.Question)
-            .WithMany(q => q.Answer)
+            .WithMany(q => q.QuestionAnswer)
             .HasForeignKey(c => c.QuestionId)
             .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<UserAnswer>()

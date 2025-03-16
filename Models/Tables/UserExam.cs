@@ -8,31 +8,26 @@ public class UserExam
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
-
     [Required]
     public int UserId { get; set; }
-    [ForeignKey("UserId")]
-    public User User { get; set; }
-
     [Required]
     public int ExamId { get; set; }
-    [ForeignKey("ExamId")]
-    public Exam Exam { get; set; }
-
     public DateTime StartTime { get; set; } = DateTime.UtcNow;
-
     public DateTime EndTime { get; set; }
-
     public int DurationSeconds { get; set; }
-
     public ExamStatus Status { get; set; } = ExamStatus.NotStarted;
-
     public int ScoreReading { get; set; }  
     public int ScoreListening { get; set; }
     public int TotalScore { get; set; }
-
-    public List<UserAnswer> UserAnswer { get; set; } = new();
     public bool IsSubmitted { get; internal set; }
+
+    [ForeignKey("UserId")]
+    public User User { get; set; }
+
+    [ForeignKey("ExamId")]
+    public Exam Exam { get; set; }
+    
+    public List<UserAnswer> UserAnswer { get; set; } = new();
 }
 public enum ExamStatus
 {

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace backend.Models;
 
-public class Answer
+public class QuestionAnswer
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -17,6 +17,8 @@ public class Answer
 
     [Required]
     public string OptionText { get; set; }
+    [Required]
+    public bool IsAnswer { get; set; }
 
     [ForeignKey("QuestionId")]
     public Question Question { get; set; }

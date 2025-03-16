@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using backend.Data;
 
@@ -10,9 +11,11 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250315073122_updateQuestionTable")]
+    partial class updateQuestionTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,6 +46,34 @@ namespace backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Account");
+                });
+
+            modelBuilder.Entity("backend.Models.Answer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("CorrectAnswer")
+                        .IsRequired()
+                        .HasColumnType("varchar(1)");
+
+                    b.Property<string>("OptionLabel")
+                        .IsRequired()
+                        .HasColumnType("varchar(1)");
+
+                    b.Property<string>("OptionText")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("Answer");
                 });
 
             modelBuilder.Entity("backend.Models.Exam", b =>
@@ -232,42 +263,12 @@ namespace backend.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<bool>("IsMultipleChoice")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<int>("Part")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.ToTable("Question");
-                });
-
-            modelBuilder.Entity("backend.Models.QuestionAnswer", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsAnswer")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("OptionLabel")
-                        .IsRequired()
-                        .HasColumnType("varchar(1)");
-
-                    b.Property<string>("OptionText")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("QuestionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("QuestionId");
-
-                    b.ToTable("QuestionAnswer");
                 });
 
             modelBuilder.Entity("backend.Models.User", b =>
@@ -370,6 +371,17 @@ namespace backend.Migrations
                     b.ToTable("UserExam");
                 });
 
+            modelBuilder.Entity("backend.Models.Answer", b =>
+                {
+                    b.HasOne("backend.Models.Question", "Question")
+                        .WithMany("Answer")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+                });
+
             modelBuilder.Entity("backend.Models.ExamQuestion", b =>
                 {
                     b.HasOne("backend.Models.Exam", "Exam")
@@ -457,17 +469,6 @@ namespace backend.Migrations
                     b.Navigation("ForumCategory");
                 });
 
-            modelBuilder.Entity("backend.Models.QuestionAnswer", b =>
-                {
-                    b.HasOne("backend.Models.Question", "Question")
-                        .WithMany("QuestionAnswer")
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Question");
-                });
-
             modelBuilder.Entity("backend.Models.User", b =>
                 {
                     b.HasOne("backend.Models.Account", "Account")
@@ -553,7 +554,7 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.Question", b =>
                 {
-                    b.Navigation("QuestionAnswer");
+                    b.Navigation("Answer");
                 });
 
             modelBuilder.Entity("backend.Models.User", b =>

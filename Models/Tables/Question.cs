@@ -14,18 +14,11 @@ public class Question
     public string Content { get; set; } = string.Empty;
     public string ImageUrl { get; set; } = string.Empty;
     public string AudioUrl { get; set; } = string.Empty;
-    
-    public string? OptionA { get; set; }
-    public string? OptionB { get; set; }
-    public string? OptionC { get; set; }
-    public string? OptionD { get; set; }
-    
-    [Required]
-    public char CorrectAnswer { get; set; }
-    
+        
     public string? Explanation { get; set; }
+    public bool IsMultipleChoice { get; set; } = false;
     
-    public List<Answer> Answer { get; set; }
+    public List<QuestionAnswer> QuestionAnswer { get; set; } = new();
 }
 
 public enum QuestionPart
