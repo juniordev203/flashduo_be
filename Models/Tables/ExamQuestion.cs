@@ -17,6 +17,7 @@ public class ExamQuestion
     [Required]
     public int QuestionId { get; set; }
     [ForeignKey("QuestionId")]
+    [Required]
     public Question Question { get; set; }
 
     [Required]
