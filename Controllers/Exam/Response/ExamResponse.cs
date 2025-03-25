@@ -24,6 +24,7 @@ namespace backend.Controllers.Exam.Response
     public class QuestionResponse
     {
         public int Id { get; set; }
+        public QuestionSection Section { get; set; }
         public QuestionPart Part { get; set; }
         public string Content { get; set; } = "";
         public string ImageUrl { get; set; } = "";

@@ -9,6 +9,8 @@ public class Question
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     [Required]
+    public QuestionSection Section { get; set; }   
+    [Required]
     public QuestionPart Part { get; set; }
     [Required]
     public string Content { get; set; } = string.Empty;
@@ -30,4 +32,10 @@ public enum QuestionPart
     Part5 = 5,
     Part6 = 6,
     Part7 = 7
+}
+
+public enum QuestionSection
+{
+    Listening = 1,
+    Reading = 2
 }

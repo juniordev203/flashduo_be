@@ -75,6 +75,10 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Question>()
             .Property(q => q.Part)
             .IsRequired()
+            .HasConversion<int>();         
+        modelBuilder.Entity<Question>()
+            .Property(q => q.Section)
+            .IsRequired()
             .HasConversion<int>(); 
         modelBuilder.Entity<UserExam>()
             .Property(ue => ue.Status)

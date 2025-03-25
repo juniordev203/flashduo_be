@@ -85,6 +85,7 @@ public class ExamController : ControllerBase
                         Question = new QuestionResponse
                         {
                             Id = eq.Question.Id,
+                            Section = eq.Question.Section,
                             Part = eq.Question.Part,
                             Content = eq.Question.Content,
                             ImageUrl = eq.Question.ImageUrl,
