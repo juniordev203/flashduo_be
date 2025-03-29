@@ -11,15 +11,18 @@ public class ExamQuestion
 
     [Required]
     public int ExamId { get; set; }
+
     [ForeignKey("ExamId")]
     public Exam Exam { get; set; }
 
     [Required]
     public int QuestionId { get; set; }
+
     [ForeignKey("QuestionId")]
-    [Required]
     public Question Question { get; set; }
 
     [Required]
     public int QuestionOrder { get; set; }  // Thứ tự câu hỏi trong đề thi
+    
+    public List<UserAnswer> UserAnswers { get; set; }
 }

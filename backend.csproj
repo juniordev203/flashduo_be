@@ -32,8 +32,4 @@
       <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.9.0" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Controllers\Exam\Response\" />
-    </ItemGroup>
-
 </Project>

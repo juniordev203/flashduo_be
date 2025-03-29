@@ -8,16 +8,23 @@ public class UserAnswer
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
+
     [Required]
     public int UserExamId { get; set; }
-    [Required]
-    public int ExamQuestionId { get; set; }
-    [Required]
-    public char UserAnswerChoice { get; set; }  // A, B, C, D
 
+    [Required]
+    public int QuestionId { get; set; }
+    [Required]
+    public QuestionSection Section { get; set; }
+
+    [Required]
+    public string UserAnswerChoice { get; set; }
+
+    // Quan hệ với UserExam
     [ForeignKey("UserExamId")]
-    public UserExam UserExam { get; set; }
+    public virtual UserExam UserExam { get; set; }
 
-    [ForeignKey("ExamQuestionId")]
-    public ExamQuestion ExamQuestion { get; set; }
+    // Quan hệ với ExamQuestion
+    [ForeignKey("QuestionId")]
+    public virtual ExamQuestion ExamQuestion { get; set; }
 }

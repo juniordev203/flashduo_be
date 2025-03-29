@@ -34,7 +34,7 @@ public class AuthController : Controller
         {
             return BadRequest("Mật khẩu không khớp");
         }
-        if (await _context.Account.AnyAsync(a => a.Email == registerRequest.Email))
+        if (await _context.Accounts.AnyAsync(a => a.Email == registerRequest.Email))
         {
             return BadRequest("Email đã tồn tại");
         }
@@ -53,7 +53,7 @@ public class AuthController : Controller
             PasswordHash = passwordHash,
         };
 
-        _context.Account.Add(account);
+        _context.Accounts.Add(account);
         await _context.SaveChangesAsync();
 
         var newUser = new Models.User
@@ -62,7 +62,7 @@ public class AuthController : Controller
             FullName = registerRequest.Username,
             AvatarUrl = "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.istockphoto.com%2Fphotos%2Fuser-avatar&psig=AOvVaw2cN4bWSN2jFoSNIxHrNrXl&ust=1741756548332000&source=images&cd=vfe&opi=89978449&ved=0CBEQjRxqFwoTCICJ8_SigYwDFQAAAAAdAAAAABAE",
         };
-        _context.User.Add(newUser);
+        _context.Users.Add(newUser);
         await _context.SaveChangesAsync();
         return Ok("Đăng ký thành công!");
     }
@@ -81,7 +81,7 @@ public class AuthController : Controller
         {
             return BadRequest(new { message ="email không hợp lệ! "});
         }
-        var account = await _context.Account
+        var account = await _context.Accounts
             .Include(a => a.User)
             .FirstOrDefaultAsync(u => u.Email == loginRequest.Email);
         if (account == null || !BCrypt.Net.BCrypt.Verify(loginRequest.Password, account.PasswordHash))

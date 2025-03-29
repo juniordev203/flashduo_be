@@ -31,12 +31,12 @@ namespace backend.Controllers.Exam.Response
         public string AudioUrl { get; set; } = "";
         public string Explanation { get; set; } = "";
         public bool IsMultipleChoice { get; set; }
-        public List<QuestionAnswerResponse> QuestionAnswer { get; set; } = new ();
+        public List<QuestionAnswerResponse> QuestionAnswers { get; set; } = new ();
         
     }
     public class QuestionAnswerResponse {
         public int Id { get; set;}
-        public char OptionLabel { get; set; }
+        public string OptionLabel { get; set; }
         public string OptionText { get; set; } = "";
         public bool IsAnswer { get; set; }
     }

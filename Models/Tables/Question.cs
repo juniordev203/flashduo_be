@@ -20,7 +20,7 @@ public class Question
     public string? Explanation { get; set; }
     public bool IsMultipleChoice { get; set; } = false;
     
-    public List<QuestionAnswer> QuestionAnswer { get; set; } = new();
+    public List<QuestionAnswer> QuestionAnswers { get; set; } = new();
 }
 
 public enum QuestionPart

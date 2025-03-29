@@ -10,5 +10,5 @@ public class Exam
     [Required] public string ExamName { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     [Required] public int TotalQuestions { get; set; } = 0;
-    [Required] public List<ExamQuestion> ExamQuestion { get; set; } = new();
+    [Required] public List<ExamQuestion> ExamQuestions { get; set; } = new();
 }

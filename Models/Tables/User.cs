@@ -14,8 +14,10 @@ public class User
     [ForeignKey("AccountId")]
     public Account Account { get; set; }
 
+    [Required]
+    [MaxLength(50)]
     public string FullName { get; set; } = "Flashduo Guy";
-    public string AvatarUrl { get; set; }
+    public string? AvatarUrl { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public List<UserExam> UserExam { get; set; } =  new();
+    public List<UserExam> UserExams { get; set; } =  new();
 }

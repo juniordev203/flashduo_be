@@ -31,7 +31,7 @@ public class ForumController : ControllerBase
     [HttpGet("posts")]
     public async Task<IActionResult> GetAllPosts()
     {
-        var posts = await _context.ForumPost
+        var posts = await _context.ForumPosts
             .Include(p => p.Account)
             .ThenInclude(a => a.User)
             .Select(p => new ForumPostResponse
@@ -51,7 +51,7 @@ public class ForumController : ControllerBase
     [HttpGet("posts/{id}")]
     public async Task<IActionResult> GetPostById(int id)
     {
-        var posts = await _context.ForumPost
+        var posts = await _context.ForumPosts
             .Include(p => p.Account)
             .ThenInclude(a => a.User)
             .Where(p => p.Id == id)
@@ -82,7 +82,7 @@ public class ForumController : ControllerBase
             TopicId = request.TopicId,
             AccountId = request.AccountId,
         };
-        _context.ForumPost.Add(post);
+        _context.ForumPosts.Add(post);
         // luu bai viet vao db
         await _context.SaveChangesAsync(); 
         return CreatedAtAction(nameof(GetPostById), new { postId = post.Id }, post);
@@ -91,10 +91,10 @@ public class ForumController : ControllerBase
     [HttpDelete("posts/{id}")]
     public async Task<IActionResult> DeletePost(int id)
     {
-        var post = await _context.ForumPost.FindAsync(id);
+        var post = await _context.ForumPosts.FindAsync(id);
         if (post == null) return NotFound("Bài viết không tồn tại!");
         
-        _context.ForumPost.Remove(post);
+        _context.ForumPosts.Remove(post);
         await _context.SaveChangesAsync();
         return Ok("Bài viết đã bị xoá!");
     }
@@ -103,7 +103,7 @@ public class ForumController : ControllerBase
     [HttpGet("topic")]
     public async Task<IActionResult> GetALlPostTopics()
     {
-        var topics = await _context.ForumTopic
+        var topics = await _context.ForumTopics
             .Include(t => t.ForumCategory)
             .Select(t => new ForumTopicResponse
             {
@@ -118,7 +118,7 @@ public class ForumController : ControllerBase
     [HttpPost("topic")]
     public async Task<IActionResult> AddPostTopic([FromBody] ForumTopic request)
     {
-        _context.ForumTopic.Add(request);
+        _context.ForumTopics.Add(request);
         await _context.SaveChangesAsync();
         return CreatedAtAction(nameof(GetPostById), new { postId = request.Id }, request);
     }
@@ -126,14 +126,14 @@ public class ForumController : ControllerBase
     [HttpGet("categories")]
     public async Task<IActionResult> GetALlCategories()
     {
-        var categories = await _context.ForumCategory.ToArrayAsync();
+        var categories = await _context.ForumCategories.ToArrayAsync();
         return Ok(new { message = categories });
     }
 
     [HttpPost("categories")]
     public async Task<IActionResult> AddPostCategory([FromBody] ForumCategory request)
     {
-        _context.ForumCategory.Add(request);
+        _context.ForumCategories.Add(request);
         await _context.SaveChangesAsync();
         return CreatedAtAction(nameof(GetALlCategories), new { id = request.Id }, request);
     }

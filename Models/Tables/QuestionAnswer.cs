@@ -10,10 +10,10 @@ public class QuestionAnswer
     public int Id { get; set; }
 
     [Required]
-    public int QuestionId { get; set; }
+    public int? QuestionId { get; set; }
 
     [Required]
-    public char OptionLabel { get; set; }  // A, B, C, D
+    public string OptionLabel { get; set; }  // A, B, C, D
 
     [Required]
     public string OptionText { get; set; }

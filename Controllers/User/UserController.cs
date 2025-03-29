@@ -30,7 +30,7 @@ public class UserController : ControllerBase
         {
             if (accountId <= 0) return BadRequest("loi account id");
             // Tìm user theo accountId
-            var user = await _context.User
+            var user = await _context.Users
                 .Where(u => u.AccountId == accountId)
                 .Select(u => new UserResponse
                 {

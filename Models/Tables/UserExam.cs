@@ -27,7 +27,7 @@ public class UserExam
     [ForeignKey("ExamId")]
     public Exam Exam { get; set; }
     
-    public List<UserAnswer> UserAnswer { get; set; } = new();
+    public List<UserAnswer> UserAnswers { get; set; } = new();
 }
 public enum ExamStatus
 {

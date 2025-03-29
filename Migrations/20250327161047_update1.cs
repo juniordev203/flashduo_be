@@ -5,14 +5,14 @@
 namespace backend.Migrations
 {
     /// <inheritdoc />
-    public partial class updateQ1 : Migration
+    public partial class update1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
                 name: "Section",
-                table: "Question",
+                table: "UserAnswers",
                 type: "int",
                 nullable: false,
                 defaultValue: 0);
@@ -23,7 +23,7 @@ namespace backend.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "Section",
-                table: "Question");
+                table: "UserAnswers");
         }
     }
 }
