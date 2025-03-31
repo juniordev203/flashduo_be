@@ -37,6 +37,7 @@ public class UserController : ControllerBase
                     Id = u.Id,
                     fullName = u.FullName,
                     avatarUrl = u.AvatarUrl,
+                    createdAt = u.CreatedAt
                 }).FirstOrDefaultAsync();
             if (user == null) return NotFound("Khong tim thay nguoi dung");
             return Ok(user);
