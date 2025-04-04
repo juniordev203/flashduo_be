@@ -28,6 +28,7 @@ public class UserExam
     public Exam Exam { get; set; }
     
     public List<UserAnswer> UserAnswers { get; set; } = new();
+
 }
 public enum ExamStatus
 {

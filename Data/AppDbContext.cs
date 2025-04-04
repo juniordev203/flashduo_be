@@ -20,9 +20,40 @@ public class AppDbContext : DbContext
     public DbSet<QuestionAnswer> QuestionAnswers { get; set; }
     public DbSet<UserAnswer> UserAnswers { get; set; }
     public DbSet<UserExam> UserExams { get; set; }
+    public DbSet<UserExamFavorite> UserExamFavorites { get; set; }
     
+    public DbSet<FlashcardFolder> FlashcardFolders { get; set; }
+    public DbSet<Flashcard> Flashcards { get; set; }
+    public DbSet<FlashcardSet> FlashcardSets { get; set; }
+    public DbSet<FlashcardTest> FlashcardTests { get; set; }
+    public DbSet<UserFlashcardSet> UserFlashcardSets { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<FlashcardSet>()
+            .HasOne(f => f.FlashcardFolder)
+            .WithMany(f => f.FlashcardSets)
+            .HasForeignKey(f => f.FlashcardFolderId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Flashcard>()
+            .HasOne(f => f.FlashcardSet)
+            .WithMany(f => f.Flashcards)
+            .HasForeignKey(f => f.FlashcardSetId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<UserFlashcardSet>()
+            .HasOne(ufs => ufs.User)
+            .WithMany(u => u.UserFlashcardSets)
+            .HasForeignKey(ufs => ufs.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<FlashcardTest>()
+            .HasOne(ft => ft.User)
+            .WithMany(u =>u.FlashcardTests)
+            .HasForeignKey(ft => ft.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<FlashcardFolder>()
+            .HasOne(ff => ff.User)
+            .WithMany(u => u.FlashcardFolders)
+            .HasForeignKey(ff => ff.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<Account>()
             .HasOne(a => a.User)
             .WithOne(u => u.Account)

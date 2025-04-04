@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace backend.Models;
 
@@ -11,4 +12,5 @@ public class Exam
     public string Description { get; set; } = string.Empty;
     [Required] public int TotalQuestions { get; set; } = 0;
     [Required] public List<ExamQuestion> ExamQuestions { get; set; } = new();
+
 }

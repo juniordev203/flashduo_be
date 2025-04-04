@@ -24,7 +24,7 @@ public class ExamController : ControllerBase
         _configuration = configuration;
     }
 
-    // API lấy toàn bộ đề thi
+    // GET
     [HttpGet("exam")]
     [ProducesResponseType(typeof(List<ExamResponse>), 200)]
     public async Task<ActionResult<List<ExamResponse>>> GetExams()
@@ -62,7 +62,6 @@ public class ExamController : ControllerBase
 
     }
     
-    //api lay cau hoi cho de thi dc chon
     [HttpGet("exam-start/{examId}")]
     [ProducesResponseType(typeof(ExamResponse), 200)]
     [ProducesResponseType(404)]
@@ -112,16 +111,121 @@ public class ExamController : ControllerBase
         return Ok(examStartById);
     }
 
-    // xử lý kiểu trả về của UserAnswer
-    //kiểm tra đúng sai
-    // - lấy kết quả người dùng chọn
-    // - lấy kết quả đúng trong database
-    // 
-    //chấm điểm
-    // - so sanhs kết quả
-    // - nếu đúng thì + 5 điểm rồi chấm tiếp câu tiếp theo
-    // - nếu sai thì bỏ qua, so sansh câu tiếp theo
+    [HttpGet("user-exam/{userExamId}/score")]
+    [ProducesResponseType(typeof(UserExamScoreResponse), 200)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> GetExamScore(int userExamId)
+    {
+        var userExam = await _context.UserExams
+            .Include(ue => ue.UserAnswers)
+            .FirstOrDefaultAsync(ue => ue.Id == userExamId);
 
+        if (userExam == null)
+        {
+            return BadRequest("Khong tim thay bai thi");
+        }
+
+        var userAnswers = userExam.UserAnswers;
+        
+        var questionIdsListening = userAnswers
+            .Where(ua => ua.Section == QuestionSection.Listening)
+            .Select(eq => eq.QuestionId)
+            .ToList();
+            
+        var questionIdsReading = userAnswers
+            .Where(ua => ua.Section == QuestionSection.Reading)
+            .Select(eq => eq.QuestionId)
+            .ToList();
+
+        var correctAnswers = await _context.QuestionAnswers
+            .Where(qa => qa.IsAnswer == true && qa.QuestionId.HasValue && 
+                         (questionIdsListening.Contains(qa.QuestionId.Value) || 
+                          questionIdsReading.Contains(qa.QuestionId.Value)))
+            .ToDictionaryAsync(qa => qa.QuestionId.Value, qa => qa.OptionLabel);
+
+        var userAnswersDict = userAnswers
+            .ToDictionary(ua => ua.QuestionId, ua => ua.UserAnswerChoice);
+
+        int totalUserAnswerCorrectReading = 0;
+        int totalUserAnswerCorrectListening = 0;
+        int scoreListening = 0;
+        int scoreReading = 0;
+
+        foreach (int questionId in questionIdsListening)
+        {
+            if (userAnswersDict.TryGetValue(questionId, out var userAnswer) && 
+                correctAnswers.TryGetValue(questionId, out var correctAnswer) && 
+                userAnswer == correctAnswer)
+            {
+                totalUserAnswerCorrectListening++;
+            }
+        }
+
+        if (totalUserAnswerCorrectListening == 0)
+        {
+            scoreListening = 5;
+        }
+
+        if (totalUserAnswerCorrectListening > 0 && totalUserAnswerCorrectListening < 96)
+        {
+            scoreListening = totalUserAnswerCorrectListening * 5 + 10;
+        }
+        else if (totalUserAnswerCorrectListening >= 96)
+        {
+            scoreListening = 495;
+        }
+
+        foreach (int questionId in questionIdsReading)
+        {
+            if (userAnswersDict.TryGetValue(questionId, out var userAnswer) && 
+                correctAnswers.TryGetValue(questionId, out var correctAnswer) && 
+                userAnswer == correctAnswer)
+            {
+                totalUserAnswerCorrectReading++;
+            }
+        }
+
+        if (totalUserAnswerCorrectReading >= 0 && totalUserAnswerCorrectReading <= 2)
+        {
+            scoreReading = 5;
+        }
+        else if (totalUserAnswerCorrectReading > 2 && totalUserAnswerCorrectReading <= 100)
+        {
+            scoreReading = (totalUserAnswerCorrectReading - 1) * 5;
+        }
+
+        userExam.ScoreListening = scoreListening;
+        userExam.ScoreReading = scoreReading;
+        userExam.Status = ExamStatus.Completed;
+        await _context.SaveChangesAsync();
+
+        return Ok(new UserExamScoreResponse
+        {
+            UserId = userExam.UserId,
+            UserExamId = userExam.Id,
+            ScoreListening = userExam.ScoreListening,
+            ScoreReading = userExam.ScoreReading,
+        });
+    }
+
+    [HttpGet("user-exam/{userId}/favorite")]
+    [ProducesResponseType(typeof(UserExamFavoriteResponse), 200)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> GetExamFavoriteByUserId(int userId)
+    {
+        var favoriteExams = await _context.UserExamFavorites
+            .Where(uf => uf.UserId == userId)
+            .Select(uf => uf.Exam)
+            .ToListAsync();
+
+        if (favoriteExams == null || !favoriteExams.Any())
+        {
+            return NotFound("No favorite exams found for this user.");
+        }
+        return Ok(favoriteExams);
+    }
+
+    //POST
     [HttpPost("user-exam/start")]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
@@ -142,7 +246,7 @@ public class ExamController : ControllerBase
         await _context.SaveChangesAsync();
         return Ok(userExam.Id);
     }
-    
+
     [HttpPost("user-answer/{userExamId}")]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
@@ -182,9 +286,9 @@ public class ExamController : ControllerBase
             var userAnswers = request.answerChoice.Select(a => new UserAnswer
             {
                 UserExamId = userExam.Id,
-                QuestionId = a.QuestionId,  // Đảm bảo tên thuộc tính khớp với client
-                Section = a.Section,         // Đảm bảo tên thuộc tính khớp với client
-                UserAnswerChoice = a.OptionLabel  // Đảm bảo tên thuộc tính khớp với client
+                QuestionId = a.QuestionId, // Đảm bảo tên thuộc tính khớp với client
+                Section = a.Section, // Đảm bảo tên thuộc tính khớp với client
+                UserAnswerChoice = a.OptionLabel // Đảm bảo tên thuộc tính khớp với client
             }).ToList();
 
             await _context.UserAnswers.AddRangeAsync(userAnswers);
@@ -197,101 +301,27 @@ public class ExamController : ControllerBase
             return BadRequest($"Lỗi khi lưu đáp án: {ex.Message}");
         }
     }
-    [HttpGet("user-exam/{userExamId}/score")]
-[ProducesResponseType(typeof(UserExamScoreResponse), 200)]
-[ProducesResponseType(400)]
-public async Task<IActionResult> GetExamScore(int userExamId)
-{
-    var userExam = await _context.UserExams
-        .Include(ue => ue.UserAnswers)
-        .FirstOrDefaultAsync(ue => ue.Id == userExamId);
 
-    if (userExam == null)
+    [HttpPost("user-exam/favorite")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> AddUserExamFavorites(int userId, int examId)
     {
-        return BadRequest("Khong tim thay bai thi");
-    }
-
-    var userAnswers = userExam.UserAnswers;
-    
-    var questionIdsListening = userAnswers
-        .Where(ua => ua.Section == QuestionSection.Listening)
-        .Select(eq => eq.QuestionId)
-        .ToList();
-        
-    var questionIdsReading = userAnswers
-        .Where(ua => ua.Section == QuestionSection.Reading)
-        .Select(eq => eq.QuestionId)
-        .ToList();
-
-    var correctAnswers = await _context.QuestionAnswers
-        .Where(qa => qa.IsAnswer == true && qa.QuestionId.HasValue && 
-                     (questionIdsListening.Contains(qa.QuestionId.Value) || 
-                      questionIdsReading.Contains(qa.QuestionId.Value)))
-        .ToDictionaryAsync(qa => qa.QuestionId.Value, qa => qa.OptionLabel);
-
-    var userAnswersDict = userAnswers
-        .ToDictionary(ua => ua.QuestionId, ua => ua.UserAnswerChoice);
-
-    int totalUserAnswerCorrectReading = 0;
-    int totalUserAnswerCorrectListening = 0;
-    int scoreListening = 0;
-    int scoreReading = 0;
-
-    foreach (int questionId in questionIdsListening)
-    {
-        if (userAnswersDict.TryGetValue(questionId, out var userAnswer) && 
-            correctAnswers.TryGetValue(questionId, out var correctAnswer) && 
-            userAnswer == correctAnswer)
+        var existingFavorite = await _context.UserExamFavorites
+            .FirstOrDefaultAsync((uf => uf.UserId==userId && uf.ExamId==examId));
+        if (existingFavorite != null)
         {
-            totalUserAnswerCorrectListening++;
+            return BadRequest("Bai thi da duoc yeu thich");
         }
-    }
 
-    if (totalUserAnswerCorrectListening == 0)
-    {
-        scoreListening = 5;
-    }
-
-    if (totalUserAnswerCorrectListening > 0 && totalUserAnswerCorrectListening < 96)
-    {
-        scoreListening = totalUserAnswerCorrectListening * 5 + 10;
-    }
-    else if (totalUserAnswerCorrectListening >= 96)
-    {
-        scoreListening = 495;
-    }
-
-    foreach (int questionId in questionIdsReading)
-    {
-        if (userAnswersDict.TryGetValue(questionId, out var userAnswer) && 
-            correctAnswers.TryGetValue(questionId, out var correctAnswer) && 
-            userAnswer == correctAnswer)
+        var userExamFavorite = new UserExamFavorite
         {
-            totalUserAnswerCorrectReading++;
-        }
+            ExamId = examId,
+            UserId = userId,
+        };
+        await _context.UserExamFavorites.AddAsync(userExamFavorite);
+        await _context.SaveChangesAsync();
+        return Ok();
     }
-
-    if (totalUserAnswerCorrectReading >= 0 && totalUserAnswerCorrectReading <= 2)
-    {
-        scoreReading = 5;
-    }
-    else if (totalUserAnswerCorrectReading > 2 && totalUserAnswerCorrectReading <= 100)
-    {
-        scoreReading = (totalUserAnswerCorrectReading - 1) * 5;
-    }
-
-    userExam.ScoreListening = scoreListening;
-    userExam.ScoreReading = scoreReading;
-    userExam.Status = ExamStatus.Completed;
-    await _context.SaveChangesAsync();
-
-    return Ok(new UserExamScoreResponse
-    {
-        UserId = userExam.UserId,
-        UserExamId = userExam.Id,
-        ScoreListening = userExam.ScoreListening,
-        ScoreReading = userExam.ScoreReading,
-    });
-}
 }
 
