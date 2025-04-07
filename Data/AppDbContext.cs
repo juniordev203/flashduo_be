@@ -29,6 +29,11 @@ public class AppDbContext : DbContext
     public DbSet<UserFlashcardSet> UserFlashcardSets { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Flashcard>()
+            .HasOne(f => f.User)
+            .WithMany(u => u.Flashcards)
+            .HasForeignKey(f => f.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<FlashcardSet>()
             .HasOne(f => f.FlashcardFolder)
             .WithMany(f => f.FlashcardSets)

@@ -23,7 +23,7 @@ public class FlashcardController : ControllerBase
     }
     
     //GET
-    [HttpGet("flashcard-folders/user/{userId}")]
+    [HttpGet("flashcard-folders/{userId}")]
     [ProducesResponseType(typeof(FlashcardFolderResponse), 200)]
     public async Task<IActionResult> GetFlashcardFolders(int userId)
     {
@@ -38,7 +38,7 @@ public class FlashcardController : ControllerBase
         return Ok(folders);
     }
 
-    [HttpGet("flashcard-sets/folder/{folderId}")]
+    [HttpGet("flashcard-sets/{folderId}")]
     [ProducesResponseType(typeof(FlashcardSetResponse), 200)]
     public async Task<IActionResult> GetFlashcardSets(int folderId)
     {
@@ -52,12 +52,13 @@ public class FlashcardController : ControllerBase
                 IsPublic = f.IsPublic,
                 FolderId = f.FlashcardFolderId,
                 UserId = f.UserId,
-                CreatedAt = f.CreatedAt
+                CreatedAt = f.CreatedAt,
+                TotalCards = f.TotalCards,
             }).ToListAsync();
         return Ok(sets);
     }
 
-    [HttpGet("flashcard/set/{setId}")]
+    [HttpGet("flashcard/{setId}")]
     [ProducesResponseType(typeof(FlashcardSetResponse), 200)]
     public async Task<IActionResult> GetFlashcardBySet(int setId)
     {
@@ -77,6 +78,7 @@ public class FlashcardController : ControllerBase
     }
     
     [HttpGet("flashcard-set/{id}")]
+    [ProducesResponseType(typeof(FlashcardSetDetailResponse), 200)]
     public async Task<IActionResult> GetFlashcardSetWithFlashcards(int id)
     {
         var set = await _context.FlashcardSets
@@ -95,6 +97,7 @@ public class FlashcardController : ControllerBase
             FolderId = set.FlashcardFolderId,
             UserId = set.UserId,
             CreatedAt = set.CreatedAt,
+            TotalCards = set.TotalCards,
             Flashcards = set.Flashcards.Select(f => new FlashcardResponse
             {
                 Id = f.Id,
@@ -187,6 +190,7 @@ public class FlashcardController : ControllerBase
             ImageUrl = request.ImageUrl,
             AudioUrl = request.AudioUrl,
             FlashcardSetId = request.FlashcardSetId,
+            UserId = request.UserId,
         };
         await _context.Flashcards.AddAsync(flashcard);
         var set = await _context.FlashcardSets.FindAsync(request.FlashcardSetId);

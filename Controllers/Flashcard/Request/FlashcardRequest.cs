@@ -13,4 +13,6 @@ public class FlashcardRequest
     
     [Required]
     public int FlashcardSetId { get; set; }
+    [Required]
+    public int UserId { get; set; }
 }

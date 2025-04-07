@@ -21,7 +21,8 @@ public class User
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public List<UserExam> UserExams { get; set; } =  new();
     public List<FlashcardFolder> FlashcardFolders { get; set; } = new();
-    public List<FlashcardTest> FlashcardTests { get; set; } = new();
     public List<UserFlashcardSet> UserFlashcardSets { get; set; } = new();
+    public List<FlashcardTest> FlashcardTests { get; set; } = new();
+    public List<Flashcard> Flashcards { get; set; } = new();
     
 }
