@@ -17,6 +17,7 @@ public class FlashcardFolder
     [ForeignKey("UserId")]
     public User User { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedNameAt { get; set; } = DateTime.Now;
     
     public List<FlashcardSet> FlashcardSets { get; set; } = new();
 }
