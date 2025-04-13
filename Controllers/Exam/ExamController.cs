@@ -266,7 +266,8 @@ public class ExamController : ControllerBase
         {
             ExamId = request.ExamId,
             UserId = request.UserId,
-            Status = request.Status
+            Status = request.Status,
+            StartTime = DateTime.UtcNow,
         };
         await _context.UserExams.AddAsync(userExam);
         await _context.SaveChangesAsync();

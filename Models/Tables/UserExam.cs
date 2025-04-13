@@ -13,7 +13,7 @@ public class UserExam
     [Required]
     public int ExamId { get; set; }
     public DateTime StartTime { get; set; } = DateTime.UtcNow;
-    public DateTime EndTime { get; set; }
+    public DateTime EndTime { get; set; } = DateTime.UtcNow;
     public int DurationSeconds { get; set; }
     public ExamStatus Status { get; set; } = ExamStatus.NotStarted;
     public int ScoreReading { get; set; }  
