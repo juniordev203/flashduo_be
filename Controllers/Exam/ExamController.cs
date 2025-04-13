@@ -196,6 +196,7 @@ public class ExamController : ControllerBase
 
         userExam.ScoreListening = scoreListening;
         userExam.ScoreReading = scoreReading;
+        userExam.TotalScore = scoreListening + scoreReading;
         userExam.Status = ExamStatus.Completed;
         await _context.SaveChangesAsync();
 
@@ -225,6 +226,31 @@ public class ExamController : ControllerBase
         return Ok(favoriteExams);
     }
 
+    [HttpGet("user-exam/{userId}/result-exams")]
+    [ProducesResponseType(typeof(UserExamResultResponse), 200)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> GetExamResultByUserId(int userId)
+    {
+        var examResultByUserId = await _context.UserExams
+            .Include(u => u.Exam)
+            .Where(uf => uf.UserId == userId && uf.Status == ExamStatus.Completed)
+            .Select(uf => new UserExamResultResponse
+            {
+                Id = uf.Id,
+                ExamName = uf.Exam.ExamName,
+                ScoreListening = uf.ScoreListening,
+                ScoreReading = uf.ScoreReading,
+                TotalScore = uf.TotalScore,
+                StartTime = uf.StartTime,
+                EndTime = uf.EndTime,
+            }).ToListAsync();
+        
+        return Ok(examResultByUserId);
+    }
+    
+    
+    
+    
     //POST
     [HttpPost("user-exam/start")]
     [ProducesResponseType(200)]

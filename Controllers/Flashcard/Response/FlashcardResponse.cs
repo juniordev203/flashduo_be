@@ -7,7 +7,7 @@ public class FlashcardResponse
     public string DefinitionLanguage { get; set; }
     public string ImageUrl { get; set; }
     public string AudioUrl { get; set; }
-    public bool IsFavourite { get; set; }
+    public bool IsFavorite { get; set; }
     public bool IsDeleted { get; set; }
     public int CorrectCount { get; set; }
     public int WrongCount { get; set; }

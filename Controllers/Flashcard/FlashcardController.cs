@@ -77,7 +77,7 @@ public class FlashcardController : ControllerBase
             }).ToListAsync();
         return Ok(sets);
     }
-    [HttpGet("flashcard-set/{id}")]
+    [HttpGet("flashcard-set/details/{setId}")]
     [ProducesResponseType(typeof(FlashcardSetDetailResponse), 200)]
     public async Task<IActionResult> GetFlashcardSetWithFlashcards(int id)
     {
@@ -111,43 +111,46 @@ public class FlashcardController : ControllerBase
 
         return Ok(response);
     }
-    
-    [HttpGet("flashcard/{setId}")]
-    [ProducesResponseType(typeof(FlashcardSetResponse), 200)]
-    public async Task<IActionResult> GetFlashcardBySet(int setId)
+
+    [HttpGet("flashcard/set/{setId}")]
+    [ProducesResponseType(typeof(FlashcardFavoritesResponse), 200)]
+    public async Task<IActionResult> GetFlashcardBySetId(int setId)
     {
-        var flashcards = await _context.Flashcards
+        var flashcardsBySetId = await _context.Flashcards
             .Where(f => f.FlashcardSetId == setId)
-            .Select(f => new FlashcardResponse
+            .Select(f => new FlashcardFavoritesResponse
             {
                 Id = f.Id,
                 TermLanguage = f.TermLanguage,
                 DefinitionLanguage = f.DefinitionLanguage,
                 ImageUrl = f.ImageUrl,
                 AudioUrl = f.AudioUrl,
-                FlashcardSetId = f.FlashcardSetId
+                FlashcardSetId = f.FlashcardSetId,
+                IsFavorite = f.IsFavorite
             }).ToListAsync();
-
-        return Ok(flashcards);
+        return Ok(flashcardsBySetId);
     }
     
-    [HttpGet("flashcard/favorites")]
-    public async Task<IActionResult> GetFavoriteFlashcards([FromQuery] int userId)
+    [HttpGet("flashcard/favorites/{userId}")]
+    [ProducesResponseType(typeof(FlashcardFavoritesResponse), 200)]
+    public async Task<IActionResult> GetFavoriteFlashcards(int userId)
     {
         var flashcards = await _context.Flashcards
             .Include(f => f.FlashcardSet)
             .Where(f => f.IsFavorite && f.FlashcardSet.UserId == userId)
+            .Select(f => new FlashcardFavoritesResponse
+            {
+                Id = f.Id,
+                TermLanguage = f.TermLanguage,
+                DefinitionLanguage = f.DefinitionLanguage,
+                ImageUrl = f.ImageUrl,
+                AudioUrl = f.AudioUrl,
+                FlashcardSetId = f.FlashcardSetId,
+                IsFavorite = f.IsFavorite,
+            })
             .ToListAsync();
 
-        return Ok(flashcards.Select(f => new FlashcardResponse
-        {
-            Id = f.Id,
-            TermLanguage = f.TermLanguage,
-            DefinitionLanguage = f.DefinitionLanguage,
-            ImageUrl = f.ImageUrl,
-            AudioUrl = f.AudioUrl,
-            FlashcardSetId = f.FlashcardSetId
-        }));
+        return Ok(flashcards);
     }
     
     //POST
@@ -247,7 +250,18 @@ public class FlashcardController : ControllerBase
         await _context.SaveChangesAsync();
         return Ok();
     }
-    
+
+    [HttpPut("flashcard/set-name/{id}")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> ToggleUpdateSetName(int id, string name)
+    {
+        var set = await _context.FlashcardSets.FindAsync(id);
+        if (set == null) { return BadRequest(); }
+        set.SetName = name;
+        await _context.SaveChangesAsync();
+        return Ok();
+    }
     //DELETE
     [HttpDelete("flashcard-folder-delete/{id}")]
     public async Task<IActionResult> DeleteFlashcardFolder(int id)
