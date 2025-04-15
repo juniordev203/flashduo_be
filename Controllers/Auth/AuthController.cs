@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using backend.Controllers.Auth.request;
 using backend.Controllers.Auth.Response;
@@ -45,11 +46,12 @@ public class AuthController : Controller
         }
         // ma hoa mat khau
         string passwordHash = BCrypt.Net.BCrypt.HashPassword(registerRequest.Password);
-
+        var refreshToken = GenerateRefreshToken();
         // Tạo user mới
         var account = new Account
         {
             Email = registerRequest.Email,
+            RefreshToken = refreshToken,
             PasswordHash = passwordHash,
             CreatedAt = DateTime.Now
         };
@@ -69,7 +71,6 @@ public class AuthController : Controller
         return Ok("Đăng ký thành công!");
     }
 
-    [AllowAnonymous]
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthLoginResponse), 200)]
     public async Task<IActionResult> Login([FromBody] AuthLoginRequest loginRequest)
@@ -91,19 +92,65 @@ public class AuthController : Controller
             return Unauthorized(new { message = "Tài khoản hoặc mật khẩu không đúng." });
         }
 
-        var token = GenerateJwtToken(account);
+        var access_token = GenerateJwtToken(account);
+        var refresh_token = GenerateRefreshToken();
+        
+        account.RefreshToken = refresh_token;
+        account.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        await _context.SaveChangesAsync();
         var response = new AuthLoginResponse
         {
-            Token = token,
+            AccessToken = access_token,
+            RefreshToken = refresh_token,
             Id = account.Id,
             Email = account.Email,
-            FullName = "Flashduo Guy",
+            FullName = account.User?.FullName ?? "Unknown",
             Role = account.Role
         };
         return Ok(response);
         
         
     }
+    
+    [HttpPost("refresh-token")]
+    [ProducesResponseType(typeof(AuthLoginResponse), 200)]
+    public async Task<IActionResult> RefreshToken([FromBody] AuthRefreshTokenRequest refreshTokenRequest)
+    {
+        if (string.IsNullOrWhiteSpace(refreshTokenRequest.RefreshToken))
+        {
+            return BadRequest(new { message = "Vui lòng cung cấp Refresh Token." });
+        }
+
+        var account = await _context.Accounts
+            .FirstOrDefaultAsync(a => a.RefreshToken == refreshTokenRequest.RefreshToken);
+
+        if (account == null || account.RefreshTokenExpiryTime < DateTime.UtcNow)
+        {
+            return Unauthorized(new { message = "Refresh Token không hợp lệ hoặc đã hết hạn." });
+        }
+
+        // Tạo mới Access Token và Refresh Token
+        var accessToken = GenerateJwtToken(account);
+        var refreshToken = GenerateRefreshToken();
+
+        // Lưu Refresh Token mới vào DB
+        account.RefreshToken = refreshToken;
+        account.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7); // Giả sử Refresh Token sống 7 ngày
+        await _context.SaveChangesAsync();
+
+        var response = new AuthLoginResponse
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+            Id = account.Id,
+            Email = account.Email,
+            FullName = account.User?.FullName ?? "Unknown",
+            Role = account.Role
+        };
+
+        return Ok(response);
+    }
+
     private bool IsValidEmail(string email)
     {
         try
@@ -125,17 +172,29 @@ public class AuthController : Controller
             new Claim(JwtRegisteredClaimNames.Sub, account.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, account.Email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim("accountId", account.Id.ToString())
+            new Claim("accountId", account.Id.ToString()),
+            new Claim(ClaimTypes.Role, account.Role) 
         };
 
         var token = new JwtSecurityToken(
             issuer: _config["Jwt:Issuer"],
             audience: _config["Jwt:Audience"],
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(12),
+            expires: DateTime.UtcNow.AddHours(1),
             signingCredentials: new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256)
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+    
+    private string GenerateRefreshToken()
+    {
+        var randomBytes = new byte[64];
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(randomBytes);
+            return Convert.ToBase64String(randomBytes);
+        }
+    }
+
 }

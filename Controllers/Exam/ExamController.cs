@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 using backend.Controllers.Exam.Request;
+using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers.Exam;
 

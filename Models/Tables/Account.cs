@@ -18,4 +18,7 @@ public class Account
     public List<ForumPost> Posts { get; set; }
     public List<ForumEmotion> Emotions{ get; set; }
     public List<ForumComment> Comments { get; set; }
+    
+    public string RefreshToken { get; set; }
+    public DateTime RefreshTokenExpiryTime { get; set; }
 }

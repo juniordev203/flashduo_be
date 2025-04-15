@@ -2,6 +2,7 @@ using backend.Controllers.Flashcard.Request;
 using backend.Controllers.Flashcard.Response;
 using backend.Data;
 using backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ namespace backend.Controllers.Flashcard;
 [ApiExplorerSettings(GroupName = "Flashcard")]
 [Tags("Flashcard")]
 [ApiController]
+[Authorize]
 [Route("api/Flashcard")]
 public class FlashcardController : ControllerBase
 {
