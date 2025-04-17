@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using backend.Data;
 
@@ -10,9 +11,11 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250417085907_updateUserFlashcardGames")]
+    partial class updateUserFlashcardGames
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -452,8 +455,11 @@ namespace backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<double>("DurationTime")
-                        .HasColumnType("double");
+                    b.Property<int>("DurationTime")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FlashcardSetId")
+                        .HasColumnType("int");
 
                     b.Property<int>("SetId")
                         .HasColumnType("int");
@@ -466,7 +472,7 @@ namespace backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SetId");
+                    b.HasIndex("FlashcardSetId");
 
                     b.HasIndex("UserId");
 
@@ -805,7 +811,7 @@ namespace backend.Migrations
                 {
                     b.HasOne("backend.Models.FlashcardSet", "FlashcardSet")
                         .WithMany()
-                        .HasForeignKey("SetId")
+                        .HasForeignKey("FlashcardSetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

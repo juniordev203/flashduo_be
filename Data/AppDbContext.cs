@@ -1,4 +1,5 @@
 using backend.Models;
+using backend.Models.Tables;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Data;
@@ -27,6 +28,7 @@ public class AppDbContext : DbContext
     public DbSet<FlashcardSet> FlashcardSets { get; set; }
     public DbSet<FlashcardTest> FlashcardTests { get; set; }
     public DbSet<UserFlashcardSet> UserFlashcardSets { get; set; }
+    public DbSet <UserFlashcardGame> UserFlashcardGames { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Flashcard>()
@@ -95,6 +97,12 @@ public class AppDbContext : DbContext
             .IsRequired()
             .HasConversion<string>()
             .HasDefaultValue(ExamStatus.NotStarted);
+
+        modelBuilder.Entity<UserFlashcardGame>()
+            .HasOne(ufg => ufg.User)
+            .WithMany(u => u.UserFlashcardGames)
+            .HasForeignKey(ufg => ufg.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
 

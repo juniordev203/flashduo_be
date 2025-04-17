@@ -2,6 +2,7 @@ using backend.Controllers.Flashcard.Request;
 using backend.Controllers.Flashcard.Response;
 using backend.Data;
 using backend.Models;
+using backend.Models.Tables;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -39,7 +40,6 @@ public class FlashcardController : ControllerBase
             }).ToListAsync();
         return Ok(folders);
     }
-
     [HttpGet("flashcard-sets/folder/{folderId}")]
     [ProducesResponseType(typeof(FlashcardSetResponse), 200)]
     public async Task<IActionResult> GetFlashcardSetsByFolderId(int folderId)
@@ -59,7 +59,6 @@ public class FlashcardController : ControllerBase
             }).ToListAsync();
         return Ok(setsByFolderId);
     }
-
     [HttpGet("flashcard-sets/user/{userId}")]
     [ProducesResponseType(typeof(FlashcardSetResponse), 200)]
     public async Task<IActionResult> GetFlashcardSetsByUserId(int userId)
@@ -113,7 +112,6 @@ public class FlashcardController : ControllerBase
 
         return Ok(response);
     }
-
     [HttpGet("flashcard/set/{setId}")]
     [ProducesResponseType(typeof(FlashcardFavoritesResponse), 200)]
     public async Task<IActionResult> GetFlashcardBySetId(int setId)
@@ -131,8 +129,7 @@ public class FlashcardController : ControllerBase
                 IsFavorite = f.IsFavorite
             }).ToListAsync();
         return Ok(flashcardsBySetId);
-    }
-    
+    }   
     [HttpGet("flashcard/favorites/{userId}")]
     [ProducesResponseType(typeof(FlashcardFavoritesResponse), 200)]
     public async Task<IActionResult> GetFavoriteFlashcards(int userId)
@@ -153,6 +150,36 @@ public class FlashcardController : ControllerBase
             .ToListAsync();
 
         return Ok(flashcards);
+    }
+    
+    // game
+    [HttpGet("flashcard/game/result/{userId}")]
+    [ProducesResponseType(typeof(FlashcardGameResultByUserResponse), 200)]
+    public async Task<IActionResult> GetGameResultByUserId(int userId)
+    {
+        var gameResultUser = await _context.UserFlashcardGames
+            .Where(g => g.UserId == userId)
+            .Select(ufg => new FlashcardGameResultByUserResponse
+            {
+                Id = ufg.Id,
+                CreatedAt = ufg.CreatedAt,
+                SetName = ufg.FlashcardSet.SetName,
+            }).ToListAsync();
+        return Ok(gameResultUser);
+    }
+    [HttpGet("flashcard/game/result/{setId}")]
+    [ProducesResponseType(typeof(FlashcardGameResultByUserResponse), 200)]
+    public async Task<IActionResult> GetGameResultBySetId(int setId)
+    {
+        var gameResultUser = await _context.UserFlashcardGames
+            .Where(g => g.SetId == setId)
+            .Select(ufg => new FlashcardGameResultBySetResponse
+            {
+                Id = ufg.Id,
+                CreatedAt = ufg.CreatedAt,
+                UserName = ufg.User.FullName,
+            }).ToListAsync();
+        return Ok(gameResultUser);
     }
     
     //POST
@@ -226,6 +253,35 @@ public class FlashcardController : ControllerBase
         return Ok();
     }
     
+    //game 
+    private double NormalizeTimeToSeconds(int timeInMilliseconds)
+    {
+        // Giả sử timeInMilliseconds = 6600, kết quả trả về: 6.6
+        return Math.Round(timeInMilliseconds / 10.0, 1);
+    }
+
+    [HttpPost("flashcard/game/result")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    public async Task<IActionResult> PostFlashcardGameResult([FromBody] FlashcardGameResultRequest request)
+    {
+        if (request == null)
+        {
+            return BadRequest();
+        }
+        var normalizedTime = NormalizeTimeToSeconds(request.DurationTime);
+        var flashcardGameResult = new UserFlashcardGame
+        {
+            UserId = request.UserId,
+            SetId = request.SetId,
+            DurationTime = normalizedTime,
+            CreatedAt = DateTime.UtcNow,
+            TotalWord = request.TotalWord,
+        };
+        await _context.UserFlashcardGames.AddAsync(flashcardGameResult);
+        await _context.SaveChangesAsync();
+        return Ok();
+    }
     //PUT
     [HttpPut("flashcard/{id}/favorite")]
     public async Task<IActionResult> ToggleFlashcardFavorite(int id)
@@ -239,7 +295,6 @@ public class FlashcardController : ControllerBase
         await _context.SaveChangesAsync();
         return Ok();
     }
-
     [HttpPut("flashcard/folder-name/{id}")]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
@@ -252,7 +307,6 @@ public class FlashcardController : ControllerBase
         await _context.SaveChangesAsync();
         return Ok();
     }
-
     [HttpPut("flashcard/set-name/{id}")]
     [ProducesResponseType(200)]
     [ProducesResponseType(400)]
@@ -264,6 +318,7 @@ public class FlashcardController : ControllerBase
         await _context.SaveChangesAsync();
         return Ok();
     }
+    
     //DELETE
     [HttpDelete("flashcard-folder-delete/{id}")]
     public async Task<IActionResult> DeleteFlashcardFolder(int id)

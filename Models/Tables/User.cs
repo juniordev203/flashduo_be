@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using backend.Models.Tables;
 
 namespace backend.Models;
 
@@ -24,5 +25,6 @@ public class User
     public List<UserFlashcardSet> UserFlashcardSets { get; set; } = new();
     public List<FlashcardTest> FlashcardTests { get; set; } = new();
     public List<Flashcard> Flashcards { get; set; } = new();
+    public List<UserFlashcardGame> UserFlashcardGames { get; set; } = new();
     
 }

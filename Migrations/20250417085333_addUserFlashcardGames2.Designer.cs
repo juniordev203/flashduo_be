@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using backend.Data;
 
@@ -10,9 +11,11 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250417085333_addUserFlashcardGames2")]
+    partial class addUserFlashcardGames2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -452,8 +455,8 @@ namespace backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<double>("DurationTime")
-                        .HasColumnType("double");
+                    b.Property<int>("DurationTime")
+                        .HasColumnType("int");
 
                     b.Property<int>("SetId")
                         .HasColumnType("int");
@@ -465,8 +468,6 @@ namespace backend.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SetId");
 
                     b.HasIndex("UserId");
 
@@ -803,19 +804,11 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.Tables.UserFlashcardGame", b =>
                 {
-                    b.HasOne("backend.Models.FlashcardSet", "FlashcardSet")
-                        .WithMany()
-                        .HasForeignKey("SetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("backend.Models.User", "User")
                         .WithMany("UserFlashcardGames")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("FlashcardSet");
 
                     b.Navigation("User");
                 });

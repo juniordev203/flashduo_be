@@ -39,7 +39,6 @@ public class AuthController : Controller
         {
             return BadRequest("Email đã tồn tại");
         }
-
         if (string.IsNullOrEmpty(registerRequest.Email))
         {
             return BadRequest(new { message = "Email không được để trống!" });
