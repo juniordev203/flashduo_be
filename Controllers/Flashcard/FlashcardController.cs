@@ -153,7 +153,7 @@ public class FlashcardController : ControllerBase
     }
     
     // game
-    [HttpGet("flashcard/game/result/{userId}")]
+    [HttpGet("flashcard/game-result/user/{userId}")]
     [ProducesResponseType(typeof(FlashcardGameResultByUserResponse), 200)]
     public async Task<IActionResult> GetGameResultByUserId(int userId)
     {
@@ -164,11 +164,12 @@ public class FlashcardController : ControllerBase
                 Id = ufg.Id,
                 CreatedAt = ufg.CreatedAt,
                 SetName = ufg.FlashcardSet.SetName,
+                DurationTime = ufg.DurationTime,
             }).ToListAsync();
         return Ok(gameResultUser);
     }
-    [HttpGet("flashcard/game/result/{setId}")]
-    [ProducesResponseType(typeof(FlashcardGameResultByUserResponse), 200)]
+    [HttpGet("flashcard/game-result/set/{setId}")]
+    [ProducesResponseType(typeof(FlashcardGameResultBySetResponse), 200)]
     public async Task<IActionResult> GetGameResultBySetId(int setId)
     {
         var gameResultUser = await _context.UserFlashcardGames
@@ -178,6 +179,7 @@ public class FlashcardController : ControllerBase
                 Id = ufg.Id,
                 CreatedAt = ufg.CreatedAt,
                 UserName = ufg.User.FullName,
+                DurationTime = ufg.DurationTime,
             }).ToListAsync();
         return Ok(gameResultUser);
     }
@@ -254,7 +256,7 @@ public class FlashcardController : ControllerBase
     }
     
     //game 
-    private double NormalizeTimeToSeconds(int timeInMilliseconds)
+    private double NormalizeTimeToSeconds(double timeInMilliseconds)
     {
         // Giả sử timeInMilliseconds = 6600, kết quả trả về: 6.6
         return Math.Round(timeInMilliseconds / 10.0, 1);
