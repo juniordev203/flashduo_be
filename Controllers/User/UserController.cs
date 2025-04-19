@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using backend.Controllers.Auth.request;
+using backend.Controllers.User.Request;
 using backend.Controllers.User.Response;
 using backend.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -47,5 +49,34 @@ public class UserController : ControllerBase
             return StatusCode(500, $"Lỗi server: {ex.Message}");
         }
     }
+    
+    //PuT
+    [HttpPut("user/update/{userId}")]
+    public async Task<IActionResult> UpdateUser(int userId, [FromBody] UserUpdateRequest request)
+         {
+             try
+             {
+                 if (request == null)
+                 {
+                     return BadRequest("Yêu cầu bị trống");
+                 }
+     
+                 var user = await _context.Users.FindAsync(userId);
+                 if (user == null)
+                 {
+                     return NotFound("Không tìm thấy User!");
+                 }
+     
+                 user.FullName = request.FullName ?? user.FullName;
+                 user.AvatarUrl = request.AvatarUrl ?? user.AvatarUrl;
+                 await _context.SaveChangesAsync();
+                 return Ok();
+     
+             }
+             catch (Exception ex)
+             {
+                 return StatusCode(500, ex.Message);
+             }
+         }
     
 }
