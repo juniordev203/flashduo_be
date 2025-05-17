@@ -23,8 +23,8 @@ public class User
     public List<UserExam> UserExams { get; set; } =  new();
     public List<FlashcardFolder> FlashcardFolders { get; set; } = new();
     public List<UserFlashcardSet> UserFlashcardSets { get; set; } = new();
-    public List<FlashcardTest> FlashcardTests { get; set; } = new();
     public List<Flashcard> Flashcards { get; set; } = new();
     public List<UserFlashcardGame> UserFlashcardGames { get; set; } = new();
+    public List<UserExamFavorite> UserExamFavorites { get; set; } = new();
     
 }

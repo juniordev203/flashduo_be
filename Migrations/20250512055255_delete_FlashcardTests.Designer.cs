@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using backend.Data;
 
@@ -10,9 +11,11 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250512055255_delete_FlashcardTests")]
+    partial class delete_FlashcardTests
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -777,7 +780,7 @@ namespace backend.Migrations
                     b.HasOne("backend.Models.UserExam", "UserExam")
                         .WithMany("UserAnswers")
                         .HasForeignKey("UserExamId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ExamQuestion");
@@ -813,9 +816,9 @@ namespace backend.Migrations
                         .IsRequired();
 
                     b.HasOne("backend.Models.User", "User")
-                        .WithMany("UserExamFavorites")
+                        .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Exam");
@@ -901,8 +904,6 @@ namespace backend.Migrations
                     b.Navigation("FlashcardFolders");
 
                     b.Navigation("Flashcards");
-
-                    b.Navigation("UserExamFavorites");
 
                     b.Navigation("UserExams");
 
