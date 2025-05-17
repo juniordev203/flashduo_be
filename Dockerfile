@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
@@ -9,8 +9,8 @@ WORKDIR /src
 COPY ["backend.csproj", "./"]
 RUN dotnet restore "backend.csproj"
 COPY . .
-WORKDIR "/src/backend"
-RUN dotnet build "backend.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src"
+RUN dotnet build "./backend.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
