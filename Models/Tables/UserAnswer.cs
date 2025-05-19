@@ -23,8 +23,6 @@ public class UserAnswer
     // Quan hệ với UserExam
     [ForeignKey("UserExamId")]
     public virtual UserExam UserExam { get; set; }
-
-    // Quan hệ với ExamQuestion
     [ForeignKey("QuestionId")]
-    public virtual ExamQuestion ExamQuestion { get; set; }
+    public virtual Question Question { get; set; }
 }

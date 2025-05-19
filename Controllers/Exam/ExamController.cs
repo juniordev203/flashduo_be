@@ -62,7 +62,7 @@ public class ExamController : ControllerBase
         return Ok(examById);
 
     }
-    
+
     [HttpGet("exam-start/{examId}")]
     [ProducesResponseType(typeof(ExamResponse), 200)]
     [ProducesResponseType(404)]
@@ -127,20 +127,20 @@ public class ExamController : ControllerBase
         }
 
         var userAnswers = userExam.UserAnswers;
-        
+
         var questionIdsListening = userAnswers
             .Where(ua => ua.Section == QuestionSection.Listening)
             .Select(eq => eq.QuestionId)
             .ToList();
-            
+
         var questionIdsReading = userAnswers
             .Where(ua => ua.Section == QuestionSection.Reading)
             .Select(eq => eq.QuestionId)
             .ToList();
 
         var correctAnswers = await _context.QuestionAnswers
-            .Where(qa => qa.IsAnswer == true && qa.QuestionId.HasValue && 
-                         (questionIdsListening.Contains(qa.QuestionId.Value) || 
+            .Where(qa => qa.IsAnswer == true && qa.QuestionId.HasValue &&
+                         (questionIdsListening.Contains(qa.QuestionId.Value) ||
                           questionIdsReading.Contains(qa.QuestionId.Value)))
             .ToDictionaryAsync(qa => qa.QuestionId.Value, qa => qa.OptionLabel);
 
@@ -154,8 +154,8 @@ public class ExamController : ControllerBase
 
         foreach (int questionId in questionIdsListening)
         {
-            if (userAnswersDict.TryGetValue(questionId, out var userAnswer) && 
-                correctAnswers.TryGetValue(questionId, out var correctAnswer) && 
+            if (userAnswersDict.TryGetValue(questionId, out var userAnswer) &&
+                correctAnswers.TryGetValue(questionId, out var correctAnswer) &&
                 userAnswer == correctAnswer)
             {
                 totalUserAnswerCorrectListening++;
@@ -178,8 +178,8 @@ public class ExamController : ControllerBase
 
         foreach (int questionId in questionIdsReading)
         {
-            if (userAnswersDict.TryGetValue(questionId, out var userAnswer) && 
-                correctAnswers.TryGetValue(questionId, out var correctAnswer) && 
+            if (userAnswersDict.TryGetValue(questionId, out var userAnswer) &&
+                correctAnswers.TryGetValue(questionId, out var correctAnswer) &&
                 userAnswer == correctAnswer)
             {
                 totalUserAnswerCorrectReading++;
@@ -245,13 +245,13 @@ public class ExamController : ControllerBase
                 StartTime = uf.StartTime,
                 EndTime = uf.EndTime,
             }).ToListAsync();
-        
+
         return Ok(examResultByUserId);
     }
-    
-    
-    
-    
+
+
+
+
     //POST
     [HttpPost("user-exam/start")]
     [ProducesResponseType(200)]
@@ -314,9 +314,9 @@ public class ExamController : ControllerBase
             var userAnswers = request.answerChoice.Select(a => new UserAnswer
             {
                 UserExamId = userExam.Id,
-                QuestionId = a.QuestionId, // Đảm bảo tên thuộc tính khớp với client
-                Section = a.Section, // Đảm bảo tên thuộc tính khớp với client
-                UserAnswerChoice = a.OptionLabel // Đảm bảo tên thuộc tính khớp với client
+                QuestionId = a.QuestionId,
+                Section = a.Section,
+                UserAnswerChoice = a.OptionLabel
             }).ToList();
 
             await _context.UserAnswers.AddRangeAsync(userAnswers);
@@ -336,7 +336,7 @@ public class ExamController : ControllerBase
     public async Task<IActionResult> AddUserExamFavorites(int userId, int examId)
     {
         var existingFavorite = await _context.UserExamFavorites
-            .FirstOrDefaultAsync((uf => uf.UserId==userId && uf.ExamId==examId));
+            .FirstOrDefaultAsync((uf => uf.UserId == userId && uf.ExamId == examId));
         if (existingFavorite != null)
         {
             return BadRequest("Bai thi da duoc yeu thich");

@@ -465,6 +465,9 @@ namespace backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int?>("ExamQuestionId")
+                        .HasColumnType("int");
+
                     b.Property<int>("QuestionId")
                         .HasColumnType("int");
 
@@ -479,6 +482,8 @@ namespace backend.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ExamQuestionId");
 
                     b.HasIndex("QuestionId");
 
@@ -768,10 +773,14 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.UserAnswer", b =>
                 {
-                    b.HasOne("backend.Models.ExamQuestion", "ExamQuestion")
+                    b.HasOne("backend.Models.ExamQuestion", null)
                         .WithMany("UserAnswers")
+                        .HasForeignKey("ExamQuestionId");
+
+                    b.HasOne("backend.Models.Question", "Question")
+                        .WithMany()
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("backend.Models.UserExam", "UserExam")
@@ -780,7 +789,7 @@ namespace backend.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("ExamQuestion");
+                    b.Navigation("Question");
 
                     b.Navigation("UserExam");
                 });

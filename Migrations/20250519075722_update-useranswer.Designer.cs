@@ -11,8 +11,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250414160619_updateAccount")]
-    partial class updateAccount
+    [Migration("20250519075722_update-useranswer")]
+    partial class updateuseranswer
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -124,9 +124,6 @@ namespace backend.Migrations
                     b.Property<int>("FlashcardSetId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("FlashcardTestId")
-                        .HasColumnType("int");
-
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -153,8 +150,6 @@ namespace backend.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("FlashcardSetId");
-
-                    b.HasIndex("FlashcardTestId");
 
                     b.HasIndex("UserId");
 
@@ -224,43 +219,6 @@ namespace backend.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("FlashcardSets");
-                });
-
-            modelBuilder.Entity("backend.Models.FlashcardTest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("FlashcardSetId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("TestType")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("TotalQuestions")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FlashcardSetId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("FlashcardTests");
                 });
 
             modelBuilder.Entity("backend.Models.ForumCategory", b =>
@@ -446,6 +404,36 @@ namespace backend.Migrations
                     b.ToTable("QuestionAnswers");
                 });
 
+            modelBuilder.Entity("backend.Models.Tables.UserFlashcardGame", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<double>("DurationTime")
+                        .HasColumnType("double");
+
+                    b.Property<int>("SetId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalWord")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SetId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserFlashcardGames");
+                });
+
             modelBuilder.Entity("backend.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -480,6 +468,9 @@ namespace backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int?>("ExamQuestionId")
+                        .HasColumnType("int");
+
                     b.Property<int>("QuestionId")
                         .HasColumnType("int");
 
@@ -494,6 +485,8 @@ namespace backend.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ExamQuestionId");
 
                     b.HasIndex("QuestionId");
 
@@ -631,10 +624,6 @@ namespace backend.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("backend.Models.FlashcardTest", null)
-                        .WithMany("Flashcards")
-                        .HasForeignKey("FlashcardTestId");
-
                     b.HasOne("backend.Models.User", "User")
                         .WithMany("Flashcards")
                         .HasForeignKey("UserId")
@@ -672,25 +661,6 @@ namespace backend.Migrations
                         .IsRequired();
 
                     b.Navigation("FlashcardFolder");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("backend.Models.FlashcardTest", b =>
-                {
-                    b.HasOne("backend.Models.FlashcardSet", "FlashcardSet")
-                        .WithMany()
-                        .HasForeignKey("FlashcardSetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("backend.Models.User", "User")
-                        .WithMany("FlashcardTests")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("FlashcardSet");
 
                     b.Navigation("User");
                 });
@@ -774,6 +744,25 @@ namespace backend.Migrations
                     b.Navigation("Question");
                 });
 
+            modelBuilder.Entity("backend.Models.Tables.UserFlashcardGame", b =>
+                {
+                    b.HasOne("backend.Models.FlashcardSet", "FlashcardSet")
+                        .WithMany()
+                        .HasForeignKey("SetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("backend.Models.User", "User")
+                        .WithMany("UserFlashcardGames")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FlashcardSet");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("backend.Models.User", b =>
                 {
                     b.HasOne("backend.Models.Account", "Account")
@@ -787,19 +776,23 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.UserAnswer", b =>
                 {
-                    b.HasOne("backend.Models.ExamQuestion", "ExamQuestion")
+                    b.HasOne("backend.Models.ExamQuestion", null)
                         .WithMany("UserAnswers")
+                        .HasForeignKey("ExamQuestionId");
+
+                    b.HasOne("backend.Models.Question", "Question")
+                        .WithMany()
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("backend.Models.UserExam", "UserExam")
                         .WithMany("UserAnswers")
                         .HasForeignKey("UserExamId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("ExamQuestion");
+                    b.Navigation("Question");
 
                     b.Navigation("UserExam");
                 });
@@ -832,9 +825,9 @@ namespace backend.Migrations
                         .IsRequired();
 
                     b.HasOne("backend.Models.User", "User")
-                        .WithMany()
+                        .WithMany("UserExamFavorites")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Exam");
@@ -893,11 +886,6 @@ namespace backend.Migrations
                     b.Navigation("Flashcards");
                 });
 
-            modelBuilder.Entity("backend.Models.FlashcardTest", b =>
-                {
-                    b.Navigation("Flashcards");
-                });
-
             modelBuilder.Entity("backend.Models.ForumCategory", b =>
                 {
                     b.Navigation("Topics");
@@ -924,11 +912,13 @@ namespace backend.Migrations
                 {
                     b.Navigation("FlashcardFolders");
 
-                    b.Navigation("FlashcardTests");
-
                     b.Navigation("Flashcards");
 
+                    b.Navigation("UserExamFavorites");
+
                     b.Navigation("UserExams");
+
+                    b.Navigation("UserFlashcardGames");
 
                     b.Navigation("UserFlashcardSets");
                 });
