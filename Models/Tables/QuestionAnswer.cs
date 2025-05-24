@@ -9,7 +9,6 @@ public class QuestionAnswer
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required]
     public int? QuestionId { get; set; }
 
     [Required]
@@ -21,5 +20,5 @@ public class QuestionAnswer
     public bool IsAnswer { get; set; }
 
     [ForeignKey("QuestionId")]
-    public Question Question { get; set; }
+    public Question? Question { get; set; }
 }

@@ -1,22 +1,21 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-
+﻿# https://hub.docker.com/_/microsoft-dotnet
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["backend.csproj", "./"]
-RUN dotnet restore "backend.csproj"
-COPY . .
-WORKDIR "/src"
-RUN dotnet build "./backend.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR /source/
 
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "backend.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+# copy everything else and build app
+COPY ./ ./
 
-FROM base AS final
+RUN dotnet restore
+
+RUN dotnet publish -c release -o ./release --no-restore
+
+# final stage/image
+FROM mcr.microsoft.com/dotnet/aspnet:7.0
+
+ARG TZ="Asia/Ho_Chi_Minh"
+ENV TZ ${TZ}
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /source/release ./
 ENTRYPOINT ["dotnet", "backend.dll"]

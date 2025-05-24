@@ -11,8 +11,8 @@ using backend.Data;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250519070313_update")]
-    partial class update
+    [Migration("20250524135103_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -394,7 +394,6 @@ namespace backend.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<int?>("QuestionId")
-                        .IsRequired()
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -468,6 +467,9 @@ namespace backend.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int?>("ExamQuestionId")
+                        .HasColumnType("int");
+
                     b.Property<int>("QuestionId")
                         .HasColumnType("int");
 
@@ -482,6 +484,8 @@ namespace backend.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ExamQuestionId");
 
                     b.HasIndex("QuestionId");
 
@@ -733,8 +737,7 @@ namespace backend.Migrations
                     b.HasOne("backend.Models.Question", "Question")
                         .WithMany("QuestionAnswers")
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Question");
                 });
@@ -771,10 +774,14 @@ namespace backend.Migrations
 
             modelBuilder.Entity("backend.Models.UserAnswer", b =>
                 {
-                    b.HasOne("backend.Models.ExamQuestion", "ExamQuestion")
+                    b.HasOne("backend.Models.ExamQuestion", null)
                         .WithMany("UserAnswers")
+                        .HasForeignKey("ExamQuestionId");
+
+                    b.HasOne("backend.Models.Question", "Question")
+                        .WithMany()
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("backend.Models.UserExam", "UserExam")
@@ -783,7 +790,7 @@ namespace backend.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("ExamQuestion");
+                    b.Navigation("Question");
 
                     b.Navigation("UserExam");
                 });

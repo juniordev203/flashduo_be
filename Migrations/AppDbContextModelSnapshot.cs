@@ -391,7 +391,6 @@ namespace backend.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<int?>("QuestionId")
-                        .IsRequired()
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -735,8 +734,7 @@ namespace backend.Migrations
                     b.HasOne("backend.Models.Question", "Question")
                         .WithMany("QuestionAnswers")
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Question");
                 });
